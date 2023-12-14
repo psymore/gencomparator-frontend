@@ -1,10 +1,10 @@
 import { Autocomplete, Grid, TextField } from "@mui/material";
 
-export default function CustomizedAutocomplete() {
-  const credentials = [Username, Email];
+export default function CustomizedAutocomplete({ title, placeholder, mt }) {
+  const credentials = ["Username", "Email", "Password", "Password Again"];
 
   return (
-    <Grid item xs={12}>
+    <Grid item xs={12} mt={mt}>
       <Autocomplete
         freeSolo
         multiple
@@ -16,10 +16,10 @@ export default function CustomizedAutocomplete() {
         renderInput={params => (
           <TextField
             {...params}
-            size="small"
+            // size="small"
             variant="outlined"
-            label="filterSelectedOptions"
-            placeholder="Favorites"
+            label={title}
+            placeholder={placeholder}
           />
         )}
       />
