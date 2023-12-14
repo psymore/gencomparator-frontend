@@ -17,9 +17,9 @@ const theme = createTheme({
   components: {
     MuiTypography: {
       defaultProps: {
-        color: "#FFFFFF",
+        color: "black",
         textTransform: "none",
-        fontSize: "2rem",
+        fontSize: 18,
       },
     },
     MuiButton: {
@@ -30,15 +30,14 @@ const theme = createTheme({
           color: "white",
           backgroundColor: "#282e59",
           ":hover": {
-            backgroundColor: "#A8F3FD",
+            // backgroundColor: "#A8F3FD",
+            backgroundColor: "#00e7e7",
             color: "black",
           },
         },
       },
     },
   },
-
-  typography: { fontSize: 13 },
 });
 
 function App() {
