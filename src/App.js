@@ -12,6 +12,13 @@ import CodyMessages from "./llms/Cody/CodyMessage";
 import LoginRegister from "./templatePrompts/LoginRegister";
 import PromptTemplates from "./templatePrompts/PromptTemplates";
 import Home from "./home/Home";
+import SendTemplate from "./templatePrompts/SendTemplate";
+import Enter from "./components/Enter";
+import UserEmail from "./components/UserEmail";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import Evaluation from "./Results/Evaluation";
+import MagicLogin from "./login/MagicLogin";
 
 const theme = createTheme({
   components: {
@@ -28,7 +35,8 @@ const theme = createTheme({
           fontSize: "1.3rem",
           textTransform: "none",
           color: "white",
-          backgroundColor: "#282e59",
+          backgroundColor: "#572bb1",
+          border: "2px solid grey",
           ":hover": {
             // backgroundColor: "#A8F3FD",
             backgroundColor: "#00e7e7",
@@ -41,11 +49,88 @@ const theme = createTheme({
 });
 
 function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+
+  const URL = "http://localhost:3001";
+
+  // Dealing with the token
+  const token = JSON.parse(localStorage.getItem("token"));
+
+  useEffect(() => {
+    const verify_token = async () => {
+      if (token === null) return setLoggedIn(false);
+      try {
+        axios.defaults.headers.common["Authorization"] = token;
+        const response = await axios.post(`${URL}/users/verify`);
+        return response.data.ok ? login(token) : logout();
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    verify_token();
+  }, []);
+
+  // ---
+
+  // Sign in, log in, log out
+  const login = token => {
+    localStorage.setItem("token", JSON.stringify(token));
+    setLoggedIn(true);
+  };
+  const logout = () => {
+    localStorage.removeItem("token");
+    setLoggedIn(false);
+  };
+  const signIn = async (email, magicLink) => {
+    try {
+      const res = await axios.post(`${URL}/users/enter`, { email, magicLink });
+      if (res.data.token) {
+        alert(res.data.message);
+        login(res.data.token);
+      } else {
+        alert(res.data.message);
+      }
+    } catch (e) {
+      alert(e);
+    }
+  };
+  // ---
+
+  // Event listeners
+  const enterEmail = e => {
+    setUserEmail(e.target.value);
+  };
+
+  const emailSubmit = e => {
+    e.preventDefault();
+    signIn(userEmail);
+    setUserEmail("");
+  };
+  // ---
+
   return (
     <div className="App">
       <ThemeProvider theme={theme}>
+        <p>You are logged {loggedIn ? "in" : "out"}</p>
+        {!loggedIn ? (
+          <UserEmail
+            enterEmail={enterEmail}
+            emailSubmit={emailSubmit}
+            userEmail={userEmail}
+            setUserEmail={setUserEmail}
+          />
+        ) : (
+          <button onClick={logout}>Logout</button>
+        )}
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<MagicLogin />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/evaluation" element={<Evaluation />} />
+          <Route
+            path="enter/:email/:link"
+            element={<Enter signIn={signIn} />}
+          />
           <Route
             path="/cody-create-conversation"
             element={<CodyConversation />}
@@ -59,6 +144,7 @@ function App() {
           <Route path="/prompt-templates" element={<PromptTemplates />} />
           <Route path="/codesandbox-url" element={<CodesandboxUrl />} />
           <Route path="/palm" element={<Palm />} />
+          <Route path="/send-template" element={<SendTemplate />} />
         </Routes>
       </ThemeProvider>
     </div>
