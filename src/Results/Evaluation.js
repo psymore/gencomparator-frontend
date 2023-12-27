@@ -1,20 +1,24 @@
-import { Grid } from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
 
 export default function Evaluation() {
+  const llmList = ["ChatGPT", "Gemini", "AlephAlpha"];
   return (
     <Grid container spacing={0}>
-      <Grid item xs={12}>
-        Palm
-      </Grid>
-      <Grid item xs={12}>
-        Bard
-      </Grid>
-      <Grid item xs={12}>
-        Cody
-      </Grid>
-      <Grid item xs={12}>
-        ChatGPT
-      </Grid>
+      {llmList.map((llm, ix) => (
+        <Grid
+          item
+          xs={12}
+          key={ix}
+          sx={{ display: "flex", justifyContent: "center", mt: 10 }}>
+          <Button
+            sx={{
+              backgroundColor: "#ffbd8f",
+              minWidth: 200,
+            }}>
+            <Typography sx={{ fontSize: 26, color: "black" }}>{llm}</Typography>
+          </Button>
+        </Grid>
+      ))}
     </Grid>
   );
 }
