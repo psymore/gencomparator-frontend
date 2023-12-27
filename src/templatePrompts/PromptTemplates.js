@@ -11,6 +11,7 @@ import { useState } from "react";
 import CustomizedAutocomplete from "../utils/CustomizedAutocomplete";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { saveKey } from "../services/userService";
 
 export default function PromptTemplates() {
   const PromptCards = ({ title, explanation, openSelection }) => {
@@ -58,8 +59,17 @@ export default function PromptTemplates() {
     CodyApiKey: "",
   });
   const [apiDialog, setApiDialog] = useState(false);
-  console.log(apiKeys);
+  const [title, setTitle] = useState("");
+  const [field, setField] = useState("");
+  console.log(field);
   const navigate = useNavigate();
+
+  const handleTitle = e => {
+    setTitle(e.target.value);
+  };
+  const handleField = e => {
+    setField(e.target.value);
+  };
 
   const handleApiKeyChange = (key, value) => {
     setApiKeys({ ...apiKeys, [key]: value });
@@ -68,7 +78,6 @@ export default function PromptTemplates() {
   const handleDialogOpen = index => {
     setSelectedCard(index);
     setDialogOpen(true);
-    console.log(index);
   };
   const handleDialogClose = () => {
     setDialogOpen(false);
@@ -83,10 +92,7 @@ export default function PromptTemplates() {
 
   const handleSaveKeys = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:3001/save-keys",
-        apiKeys
-      );
+      const response = await saveKey(apiKeys);
       console.log("API keys saved:", response.data);
       // Handle success or set a success message
     } catch (error) {
@@ -128,11 +134,11 @@ export default function PromptTemplates() {
             <Typography>Gencomparator Settings</Typography>
             <Typography
               sx={{ mt: 1, fontSize: 12, color: "red", textAlign: "justify" }}>
-              Note: We do not store your API keys —not in a cookie,
-              localStorage, or server. Because of this, you must set your API
-              keys every time you load ChainForge. If you prefer not to worry
-              about it, we recommend installing ChainForge locally and setting
-              your API keys as environment variables.
+              Note: You API keys are not stored in a cookie, localStorage, or
+              server. Because of this, you must set your API keys every time you
+              load Gencomparator. If you prefer not to worry about it,
+              installing Gencomparator locally and setting your API keys as
+              environment variables is recommended.
             </Typography>
 
             {apiKeysArray.map(({ label, key }) => (
@@ -175,9 +181,15 @@ export default function PromptTemplates() {
             </Typography>
 
             <Grid item xs={12} sx={{ mt: 3 }}>
-              <TextField label={"Write a page title here"} />
+              <TextField
+                label={"Write a page title here"}
+                value={title}
+                onChange={handleTitle}
+              />
 
               <CustomizedAutocomplete
+                value={field}
+                onChange={handleField}
                 mt={"40px"}
                 title={"You can select multiple input fields"}
                 placeholder={"Select input fields"}

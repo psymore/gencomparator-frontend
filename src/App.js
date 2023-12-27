@@ -1,5 +1,5 @@
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import "./App.css";
 import ChatGPT from "./llms/ChatGPT";
 import Palm from "./llms/Palm";
@@ -17,8 +17,10 @@ import Enter from "./components/Enter";
 import UserEmail from "./components/UserEmail";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Evaluation from "./Results/Evaluation";
 import MagicLogin from "./login/MagicLogin";
+import Evaluation from "./Results/Evaluation";
+import ProtectedRoute from "./ProtectedRoute";
+import { Button, Grid, Typography } from "@mui/material";
 
 const theme = createTheme({
   components: {
@@ -49,102 +51,41 @@ const theme = createTheme({
 });
 
 function App() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
-
-  const URL = "http://localhost:3001";
-
-  // Dealing with the token
-  const token = JSON.parse(localStorage.getItem("token"));
-
-  useEffect(() => {
-    const verify_token = async () => {
-      if (token === null) return setLoggedIn(false);
-      try {
-        axios.defaults.headers.common["Authorization"] = token;
-        const response = await axios.post(`${URL}/users/verify`);
-        return response.data.ok ? login(token) : logout();
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    verify_token();
-  }, []);
-
-  // ---
-
-  // Sign in, log in, log out
-  const login = token => {
-    localStorage.setItem("token", JSON.stringify(token));
-    setLoggedIn(true);
-  };
-  const logout = () => {
-    localStorage.removeItem("token");
-    setLoggedIn(false);
-  };
-  const signIn = async (email, magicLink) => {
-    try {
-      const res = await axios.post(`${URL}/users/enter`, { email, magicLink });
-      if (res.data.token) {
-        alert(res.data.message);
-        login(res.data.token);
-      } else {
-        alert(res.data.message);
-      }
-    } catch (e) {
-      alert(e);
-    }
-  };
-  // ---
-
-  // Event listeners
-  const enterEmail = e => {
-    setUserEmail(e.target.value);
-  };
-
-  const emailSubmit = e => {
-    e.preventDefault();
-    signIn(userEmail);
-    setUserEmail("");
-  };
-  // ---
+  const token = localStorage.getItem("token");
 
   return (
     <div className="App">
       <ThemeProvider theme={theme}>
-        <p>You are logged {loggedIn ? "in" : "out"}</p>
-        {!loggedIn ? (
-          <UserEmail
-            enterEmail={enterEmail}
-            emailSubmit={emailSubmit}
-            userEmail={userEmail}
-            setUserEmail={setUserEmail}
-          />
-        ) : (
-          <button onClick={logout}>Logout</button>
-        )}
         <Routes>
-          <Route path="/" element={<MagicLogin />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/evaluation" element={<Evaluation />} />
+          <Route path="/login" element={<MagicLogin />} />
+          <Route path="enter/:email/:link" element={<Enter />} />
           <Route
-            path="enter/:email/:link"
-            element={<Enter signIn={signIn} />}
+            element={
+              <ProtectedRoute isLoggedIn={token}>
+                <Home />
+              </ProtectedRoute>
+            }
+            path="/"
           />
+
           <Route
-            path="/cody-create-conversation"
-            element={<CodyConversation />}
+            path="/prompt-templates"
+            element={
+              <ProtectedRoute isLoggedIn={token}>
+                <PromptTemplates />
+              </ProtectedRoute>
+            }
           />
-          <Route path="/cody-bot-list" element={<CodyBotList />} />
-          <Route path="/cody-message" element={<CodyMessages />} />
-          <Route path="/chatGPT" element={<ChatGPT />} />
-          {/* <Route path="/codesandbox-test" element={<CodesandboxTest />} /> */}
-          {/* <Route path="/codesandbox" element={<Codesandbox />} /> */}
-          <Route path="/login-register" element={<LoginRegister />} />
-          <Route path="/prompt-templates" element={<PromptTemplates />} />
-          <Route path="/codesandbox-url" element={<CodesandboxUrl />} />
-          <Route path="/palm" element={<Palm />} />
-          <Route path="/send-template" element={<SendTemplate />} />
+
+          <Route
+            path="/evaluation"
+            element={
+              <ProtectedRoute isLoggedIn={token}>
+                <Evaluation />
+              </ProtectedRoute>
+            }
+          />
+          {/* <Route path="/send-template" element={<SendTemplate />} /> */}
         </Routes>
       </ThemeProvider>
     </div>
