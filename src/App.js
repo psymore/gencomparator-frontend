@@ -1,26 +1,13 @@
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import "./App.css";
-import ChatGPT from "./llms/ChatGPT";
-import Palm from "./llms/Palm";
-import Codesandbox from "./sandboxes/Codesandbox";
-import CodesandboxTest from "./sandboxes/CodesandboxTest";
-import CodesandboxUrl from "./sandboxes/CodesandboxUrl";
-import CodyBotList from "./llms/Cody/CodyListBots";
-import CodyConversation from "./llms/Cody/CodyConversation";
-import CodyMessages from "./llms/Cody/CodyMessage";
-import LoginRegister from "./templatePrompts/LoginRegister";
-import PromptTemplates from "./templatePrompts/PromptTemplates";
-import Home from "./home/Home";
-import SendTemplate from "./templatePrompts/SendTemplate";
-import Enter from "./components/Enter";
-import UserEmail from "./components/UserEmail";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import MagicLogin from "./login/MagicLogin";
-import Evaluation from "./Results/Evaluation";
-import ProtectedRoute from "./ProtectedRoute";
-import { Button, Grid, Typography } from "@mui/material";
+import Enter from "./scenes/components/Enter";
+import Home from "./scenes/home/Home";
+import MagicLogin from "./scenes/login/MagicLogin";
+import ProtectedRoute from "./lib/ProtectedRoute";
+import Evaluation from "./scenes/results/Evaluation";
+import PromptTemplates from "./scenes/templatePrompts/PromptTemplates";
+import SetApiKeys from "./scenes/apiKeys/SetApiKeys";
 
 const theme = createTheme({
   components: {
@@ -67,13 +54,21 @@ function App() {
             }
             path="/"
           />
+          <Route
+            element={
+              <ProtectedRoute isLoggedIn={token}>
+                <SetApiKeys />
+              </ProtectedRoute>
+            }
+            path="/set-keys"
+          />
 
           <Route
             path="/prompt-templates"
             element={
-              <ProtectedRoute isLoggedIn={token}>
-                <PromptTemplates />
-              </ProtectedRoute>
+              // <ProtectedRoute isLoggedIn={token}>
+              <PromptTemplates />
+              // </ProtectedRoute>
             }
           />
 
