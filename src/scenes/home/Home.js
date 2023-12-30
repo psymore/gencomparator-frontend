@@ -1,11 +1,26 @@
 import { Button, Grid, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { logoutAsync } from "../../services/userService";
 
 export default function Home() {
   const navigate = useNavigate();
 
   return (
-    <Grid container spacing={2} mt={15}>
+    <Grid container spacing={2} mt={5}>
+      <Grid item xs={12} sx={{ display: "flex", flexDirection: "row-reverse" }}>
+        <Button
+          sx={{
+            fontSize: 20,
+            fontWeight: "bold",
+            color: "white",
+            mr: 5,
+            width: 200,
+          }}
+          // onClick={logoutAsync}
+        >
+          Logout
+        </Button>
+      </Grid>
       <Grid item xs={2}></Grid>
 
       <Grid

@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Card,
   CardContent,
@@ -11,9 +12,75 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ApiKeysDialog from "../components/ApiKeysDialog";
-import CustomizedAutocomplete from "../components/CustomizedAutocomplete";
+import CustomizedAutocomplete from "../components/CustomizedAutocomplete.js";
+import { useEffect } from "react";
 
 export default function PromptTemplates() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [apiDialog, setApiDialog] = useState(false);
+  const [title, setTitle] = useState("");
+  const [fields, setFields] = useState([]);
+  const [isError, setIsError] = useState(false);
+  const [muiActive, setMuiActive] = useState(true);
+
+  const navigate = useNavigate();
+
+  const handleMuiClick = () => {
+    setMuiActive(true);
+  };
+
+  const handlePlainJsClick = () => {
+    setMuiActive(false);
+  };
+
+  const handleTitle = e => {
+    setTitle(e.target.value);
+  };
+  const handleFieldChange = (_, value) => {
+    setFields(value);
+    setIsError(value.length > 0 ? false : true);
+  };
+
+  const handleDialogOpen = index => {
+    setSelectedCard(index);
+    setDialogOpen(true);
+  };
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setIsError(false);
+  };
+
+  const handleApiDialogOpen = () => {
+    setApiDialog(true);
+  };
+  const handleApiDialogClose = () => {
+    setApiDialog(false);
+  };
+  const handleCreatePrompt = async e => {
+    e.preventDefault();
+    try {
+      if (fields.length === 0) {
+        setIsError(true);
+
+        console.log(isError);
+
+        return;
+      }
+      const text = "How are you?";
+      const api_key_id = "1";
+      const response = await axios.post("http://localhost:3001/prompt", {
+        text,
+        api_key_id,
+      });
+      console.log("Created prompt template:", response.data);
+      navigate("/send-template");
+    } catch (error) {
+      console.error("Error creating prompt template:", error);
+      // Handle error: Show an error message, log the error, etc.
+    }
+  };
+
   const PromptCards = ({ title, explanation, openSelection }) => {
     return (
       <Card
@@ -50,54 +117,22 @@ export default function PromptTemplates() {
       </Card>
     );
   };
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedCard, setSelectedCard] = useState(null);
-  const [apiDialog, setApiDialog] = useState(false);
-  const [title, setTitle] = useState("");
-  const [field, setField] = useState("");
-  console.log(field);
-  console.log(title);
-  const navigate = useNavigate();
 
-  const handleTitle = e => {
-    setTitle(e.target.value);
-  };
-  const handleField = e => {
-    setField(e.target.value);
-  };
-
-  const handleDialogOpen = index => {
-    setSelectedCard(index);
-    setDialogOpen(true);
-  };
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-  };
-
-  const handleApiDialogOpen = () => {
-    setApiDialog(true);
-  };
-  const handleApiDialogClose = () => {
-    setApiDialog(false);
-  };
-
-  const handleCreatePrompt = async e => {
-    e.preventDefault();
-    navigate("/evaluation");
+  const getPromptTemplates = async () => {
     try {
-      const text = "How are you?";
-      const api_key_id = "1";
-      const response = await axios.post(
-        "http://localhost:3001/prompt-template",
-        { text, api_key_id }
+      const response = await axios.get(
+        "http://localhost:3001/prompt-template/list"
       );
-      console.log("Created prompt template:", response.data);
-      navigate("/send-template");
+      const promptTemplates = response.data; // Accessing the prompt templates
+      console.log(promptTemplates);
     } catch (error) {
-      console.error("Error creating prompt template:", error);
-      // Handle error: Show an error message, log the error, etc.
+      console.error("Error fetching prompt template:", error);
     }
   };
+
+  useEffect(() => {
+    getPromptTemplates();
+  }, []);
 
   return (
     <Grid container spacing={0}>
@@ -130,18 +165,65 @@ export default function PromptTemplates() {
               />
 
               <CustomizedAutocomplete
-                value={field}
-                onChange={handleField}
-                mt={"40px"}
+                fields={fields}
+                isError={isError}
+                handleFieldChange={handleFieldChange}
+                mt={3}
                 title={"You can select multiple input fields"}
                 placeholder={"Select input fields"}
               />
+              {isError ? (
+                <Alert sx={{ mt: 1 }} severity="error">
+                  Select at least one field
+                </Alert>
+              ) : (
+                <></>
+              )}
+            </Grid>
+            <Grid
+              container
+              sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+              <Grid item xs={12}>
+                <Typography mb={0.2}>Styling Option</Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  variant="contained"
+                  onClick={handleMuiClick}
+                  sx={{
+                    opacity: muiActive ? 1 : 0.5,
+                    backgroundColor: "#3349f1",
+                    height: 40,
+                    color: "white",
+                    ":hover": {
+                      color: "white",
+                      backgroundColor: "#3399ff",
+                    },
+                  }}>
+                  MUI
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handlePlainJsClick}
+                  sx={{
+                    opacity: !muiActive ? 1 : 0.5,
+                    backgroundColor: "#f0db4f",
+                    color: "black",
+                    height: 40,
+                    ml: 2,
+                    ":hover": {
+                      backgroundColor: "#f0db9f",
+                    },
+                  }}>
+                  CSS
+                </Button>
+              </Grid>
             </Grid>
           </Grid>
           <Grid
             item
             xs={12}
-            sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
+            sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
             <Button
               sx={{ width: "150px", fontSize: 14, mb: 3 }}
               onClick={handleCreatePrompt}>
