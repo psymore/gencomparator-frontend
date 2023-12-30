@@ -4,8 +4,9 @@ export default function CustomizedAutocomplete({
   title,
   placeholder,
   mt,
-  field,
-  setField,
+  fields,
+  handleFieldChange,
+  isError,
 }) {
   const credentials = ["Username", "Email", "Password", "Password Again"];
 
@@ -13,7 +14,8 @@ export default function CustomizedAutocomplete({
     <Grid item xs={12} mt={mt}>
       <Autocomplete
         freeSolo
-        onChange={setField}
+        onChange={handleFieldChange}
+        value={fields || []}
         multiple
         id="tags-outlined"
         options={credentials}
@@ -21,7 +23,7 @@ export default function CustomizedAutocomplete({
         renderInput={params => (
           <TextField
             {...params}
-            value={field}
+            error={isError}
             variant="outlined"
             label={title}
             placeholder={placeholder}

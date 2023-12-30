@@ -34,7 +34,7 @@ export default function Enter() {
   useEffect(() => {
     debugger;
     signIn(params.email, params.link);
-  }, []);
+  }, [params.email, params.link]);
 
   return (
     <div>

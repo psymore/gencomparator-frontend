@@ -36,7 +36,12 @@ const UserEmail = ({ enterEmail, emailSubmit, userEmail }) => {
           />
         </Grid>
         <Grid item xs={12} mt={5}>
-          <Button variant="contained" color="primary" type="submit">
+          <Button
+            variant="outlined"
+            color="primary"
+            type="submit"
+            // sx={{ backgroundColor: "#415ebb" }}
+          >
             Sign in
           </Button>
         </Grid>
