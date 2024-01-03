@@ -12,7 +12,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { dracula } from "react-syntax-highlighter/dist/esm/styles/prism";
 import Codesandbox from "../sandboxes/Codesandbox";
 
-const SendTemplate = () => {
+const SendTemplateOld = () => {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
   const [storeResponse, setStoreResponse] = useState([]);
@@ -255,4 +255,4 @@ const SendTemplate = () => {
   );
 };
 
-export default SendTemplate;
+export default SendTemplateOld;

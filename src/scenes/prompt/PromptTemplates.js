@@ -1,3 +1,4 @@
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
   Alert,
   Button,
@@ -5,37 +6,51 @@ import {
   CardContent,
   Dialog,
   Grid,
+  IconButton,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ApiKeysDialog from "../components/ApiKeysDialog";
 import CustomizedAutocomplete from "../components/CustomizedAutocomplete.js";
-import { useEffect } from "react";
+import SendPrompt from "./SendPrompt.js";
+
+const URL = "http://localhost:3001";
 
 export default function PromptTemplates() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
-  const [apiDialog, setApiDialog] = useState(false);
-  const [title, setTitle] = useState("");
-  const [fields, setFields] = useState([]);
+  const [apiDialog, setApiDialog] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [muiActive, setMuiActive] = useState(true);
+  const [muiActive, setMuiActive] = useState(true); //for styling of buttons
+  const [title, setTitle] = useState("");
+  const [titleExists, setTitleExists] = useState(false);
+  const [fields, setFields] = useState([]);
+  const [style, setStyle] = useState("");
+  const [promptTemplates, setPromptTemplates] = useState([]);
 
   const navigate = useNavigate();
 
   const handleMuiClick = () => {
     setMuiActive(true);
+    setStyle("mui");
   };
 
-  const handlePlainJsClick = () => {
+  const handleCssClick = () => {
     setMuiActive(false);
+    setStyle("css");
   };
 
   const handleTitle = e => {
-    setTitle(e.target.value);
+    const value = e.target.value;
+    setTitle(value);
+    console.log(value);
+    {
+      value !== "" ? setTitleExists(true) : setTitleExists(false);
+    }
   };
   const handleFieldChange = (_, value) => {
     setFields(value);
@@ -51,35 +66,68 @@ export default function PromptTemplates() {
     setIsError(false);
   };
 
-  const handleApiDialogOpen = () => {
-    setApiDialog(true);
+  const handleApiDialogOpen = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/api-key/list");
+      const apiKeys = response.data;
+      console.log(apiKeys);
+      // Check if apiKeys is not empty before opening the dialog
+      if (apiKeys.length > 0) {
+        setApiDialog(true);
+      } else {
+        // Handle the case where apiKeys is empty (optional)
+        console.log("No API keys found.");
+        // You can display a message or take other actions if needed.
+      }
+    } catch (error) {
+      console.error("Error fetching API keys:", error);
+      // Handle the error, display an error message, etc.
+    }
   };
+
   const handleApiDialogClose = () => {
     setApiDialog(false);
   };
+
+  const parameters = () => {
+    const data = {
+      title: title,
+      titleExists: titleExists,
+      style: style,
+      fields: fields,
+    };
+    return data;
+  };
+  // console.log(parameters());
+  console.log(parameters());
+
   const handleCreatePrompt = async e => {
     e.preventDefault();
+
+    const requestParameters = parameters();
     try {
-      if (fields.length === 0) {
-        setIsError(true);
-
-        console.log(isError);
-
-        return;
-      }
-      const text = "How are you?";
-      const api_key_id = "1";
-      const response = await axios.post("http://localhost:3001/prompt", {
-        text,
-        api_key_id,
-      });
-      console.log("Created prompt template:", response.data);
-      navigate("/send-template");
+      const response = await axios.post(`${URL}/prompt`, requestParameters);
+      console.log(response);
+      <SendPrompt text={response} />;
+      navigate("/send-prompt");
     } catch (error) {
-      console.error("Error creating prompt template:", error);
-      // Handle error: Show an error message, log the error, etc.
+      console.error("Error creating prompt:", error);
     }
   };
+
+  useEffect(() => {
+    const getPromptTemplates = async () => {
+      try {
+        const response = await axios.get(`${URL}/prompt-template/list`);
+        setPromptTemplates(response.data.promptTemplates);
+        console.log(response);
+      } catch (error) {
+        console.error("Error fetching prompt templates:", error);
+      }
+    };
+    handleApiDialogOpen();
+    getPromptTemplates();
+  }, []);
 
   const PromptCards = ({ title, explanation, openSelection }) => {
     return (
@@ -118,22 +166,6 @@ export default function PromptTemplates() {
     );
   };
 
-  const getPromptTemplates = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:3001/prompt-template/list"
-      );
-      const promptTemplates = response.data; // Accessing the prompt templates
-      console.log(promptTemplates);
-    } catch (error) {
-      console.error("Error fetching prompt template:", error);
-    }
-  };
-
-  useEffect(() => {
-    getPromptTemplates();
-  }, []);
-
   return (
     <Grid container spacing={0}>
       {apiDialog !== false && (
@@ -163,6 +195,22 @@ export default function PromptTemplates() {
                 value={title}
                 onChange={handleTitle}
               />
+              <Tooltip
+                title=<Typography
+                  fontSize={13}
+                  sx={{ backgroundColor: "inherit", color: "white" }}>
+                  You can leave this field emtpy if you do not want a custom
+                  page title appear on top of your page.
+                </Typography>
+                placement="right"
+                arrow
+                enterDelay={10}
+                leaveDelay={200}
+                fontSize={"50px"}>
+                <IconButton sx={{ ml: 0.3, mt: 0.8 }}>
+                  <InfoOutlinedIcon sx={{ color: "#415ebb" }} />
+                </IconButton>
+              </Tooltip>
 
               <CustomizedAutocomplete
                 fields={fields}
@@ -204,7 +252,7 @@ export default function PromptTemplates() {
                 </Button>
                 <Button
                   variant="contained"
-                  onClick={handlePlainJsClick}
+                  onClick={handleCssClick}
                   sx={{
                     opacity: !muiActive ? 1 : 0.5,
                     backgroundColor: "#f0db4f",
@@ -264,52 +312,19 @@ export default function PromptTemplates() {
               display: "flex",
               justifyContent: "center",
             }}>
-            <PromptCards
-              title={"Login-Register Page"}
-              explanation={
-                "A switchable login and register page in one function."
-              }
-              openSelection={() =>
-                handleDialogOpen({
-                  title: "Login-Register Input Fields",
-                  explanation:
-                    "A switchable login and register page in one function.",
-                })
-              }
-            />
-            <PromptCards
-              title={"Album Page"}
-              explanation={"An album page which includes image fields."}
-              openSelection={() =>
-                handleDialogOpen({
-                  title: "Album Page",
-                  explanation:
-                    "A switchable login and register page in one function.",
-                })
-              }
-            />
-            <PromptCards
-              title={"Ex3"}
-              explanation={"An album page which includes image fields."}
-              openSelection={() =>
-                handleDialogOpen({
-                  title: "Album Page",
-                  explanation:
-                    "A switchable login and register page in one function.",
-                })
-              }
-            />
-            <PromptCards
-              title={"Ex4"}
-              explanation={"An album page which includes image fields."}
-              openSelection={() =>
-                handleDialogOpen({
-                  title: "Album Page",
-                  explanation:
-                    "A switchable login and register page in one function.",
-                })
-              }
-            />
+            {promptTemplates.map((template, ix) => (
+              <PromptCards
+                key={ix}
+                title={template.name}
+                explanation={template.description}
+                openSelection={() =>
+                  handleDialogOpen({
+                    title: template.name,
+                    explanation: template.description,
+                  })
+                }
+              />
+            ))}
           </Grid>
         </Grid>
       </Grid>
