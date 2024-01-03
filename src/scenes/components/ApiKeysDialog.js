@@ -1,14 +1,26 @@
 import { Button, Dialog, Grid, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { saveKey } from "../../services/userService.js";
+import CustomDialog from "./CustomDialog.js";
 
 export default function ApiKeysDialog({ open, onClose }) {
+  const [openDialog, setOpenDialog] = useState(false);
+  const [dialogContent, setDialogContent] = useState({
+    title: "",
+    text: "",
+    success: false,
+  });
   const [apiKeys, setApiKeys] = useState({
     PalmApiKey: "",
     OpenAiApiKey: "",
     BardApiKey: "",
     CodyApiKey: "",
   });
+
+  const handleClose = () => {
+    setOpenDialog(false);
+    onClose(true);
+  };
 
   const handleApiKeyChange = (key, value) => {
     setApiKeys({ ...apiKeys, [key]: value });
@@ -19,8 +31,21 @@ export default function ApiKeysDialog({ open, onClose }) {
       const response = await saveKey(apiKeys);
       console.log("API keys saved:", response.data);
       // Handle success or set a success message
+      setOpenDialog(true);
+      setDialogContent({
+        title: "API Keys Successfully Retrieved",
+        text: "They are encrypted when retrieved but you can also delete them whenever you want.",
+        success: true,
+      });
     } catch (error) {
+      console.log(error);
       console.error("Error saving API keys:", error);
+      setOpenDialog(true);
+      setDialogContent({
+        title: "Error when saving API Keys.",
+        text: "Safely Stored",
+        success: false,
+      });
       // Handle error or show an error message
     }
   };
@@ -31,9 +56,26 @@ export default function ApiKeysDialog({ open, onClose }) {
     { label: "Cody API Key", key: "CodyApiKey" },
   ];
 
+  const countEnteredKeys = Object.values(apiKeys).filter(
+    key => key !== ""
+  ).length;
+  const minimumKeysRequired = 2;
+  const hasAtLeastTwoKeys = countEnteredKeys >= minimumKeysRequired;
+
   return (
     <Grid item xs={12}>
       <Dialog open={open} onClose={onClose}>
+        {openDialog ? (
+          <CustomDialog
+            open={openDialog}
+            onClose={handleClose}
+            title={dialogContent.title}
+            text={dialogContent.text}
+            success={dialogContent.success}
+          />
+        ) : (
+          <></>
+        )}
         <Grid item xs={12} p={3}>
           <Typography>Gencomparator Settings</Typography>
           <Typography
@@ -61,8 +103,13 @@ export default function ApiKeysDialog({ open, onClose }) {
           xs={12}
           sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
           <Button
-            type="submit"
-            sx={{ width: "150px", fontSize: 14, mb: 3 }}
+            disabled={!hasAtLeastTwoKeys}
+            sx={{
+              width: "150px",
+              fontSize: 14,
+              mb: 3,
+              backgroundColor: !hasAtLeastTwoKeys ? "whitesmoke" : "",
+            }}
             onClick={handleSaveKeys}>
             Submit
           </Button>

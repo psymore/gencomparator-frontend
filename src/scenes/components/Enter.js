@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 // spinners import stuff
 import { css } from "@emotion/react";
 import FadeLoader from "react-spinners/FadeLoader";
 import axios from "axios";
+import { Alert, Grid, Typography } from "@mui/material";
 const override = css`
   display: block;
   margin: 0 auto;
@@ -14,6 +15,11 @@ const override = css`
 const URL = "http://localhost:3001";
 
 export default function Enter() {
+  const [isError, setIsError] = useState(false);
+  const [success, setSucces] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [welcomeMessage, setWelcomeMessage] = useState("");
+
   let params = useParams();
   let navigate = useNavigate();
 
@@ -21,14 +27,26 @@ export default function Enter() {
     try {
       const res = await axios.post(`${URL}/users/enter`, { email, magicLink });
       if (res.data.token) {
-        alert(res.data.message);
+        setIsError(false);
+        setSucces(true);
+        // alert(res.data.message);
+        setWelcomeMessage(res?.data?.message);
         localStorage.setItem("token", res.data.token);
-        navigate("/");
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
       } else {
-        alert(res.data.message);
+        setIsError(true);
+        setErrorMessage(res?.data?.message);
+        // alert(res.data.message);
       }
     } catch (e) {
-      alert(e);
+      setIsError(true);
+      setErrorMessage(
+        e.message || e.response?.data?.message || "An unknown error occurred"
+      );
+
+      // alert(e);
     }
   };
   useEffect(() => {
@@ -37,9 +55,71 @@ export default function Enter() {
   }, [params.email, params.link]);
 
   return (
-    <div>
-      <p>Verifying your magic link</p>
-      <FadeLoader color={"black"} loading={true} css={override} size={50} />
-    </div>
+    <Grid
+      container
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}>
+      <Grid item xs={12} mt={"10%"}>
+        {isError ? (
+          <Grid
+            item
+            xs={12}
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}>
+            <Alert
+              sx={{
+                fontSize: 25,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "30%",
+                height: "100px",
+                "& .MuiAlert-icon": { fontSize: 35 },
+              }}
+              severity="error">
+              {errorMessage}
+            </Alert>
+          </Grid>
+        ) : (
+          <Typography color={"white"} fontSize={30}>
+            Verifying your magic link
+          </Typography>
+        )}
+        {success ? (
+          <Alert
+            sx={{
+              fontSize: 25,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "30%",
+              height: "100px",
+              "& .MuiAlert-icon": { fontSize: 35 },
+            }}
+            severity="success">
+            {welcomeMessage}
+          </Alert>
+        ) : (
+          <></>
+        )}
+      </Grid>
+      <Grid
+        item
+        xs={12}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          mt: 5,
+        }}>
+        <FadeLoader color={"white"} loading={true} css={override} size={50} />
+      </Grid>
+    </Grid>
   );
 }

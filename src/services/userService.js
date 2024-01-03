@@ -8,10 +8,11 @@ const loginAsync = async data => {
 
 const logoutAsync = async () => {
   localStorage.removeItem("token");
-  return <Navigate to={"/login"} />;
+  return <Navigate to={"http://localhost:3000/login"} />;
 };
 
 const saveKey = apiKeys => {
+  console.log(apiKeys);
   return authAxios.post("http://localhost:3001/api-key", apiKeys);
 };
 

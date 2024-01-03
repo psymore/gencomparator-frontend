@@ -16,8 +16,7 @@ export default function Home() {
             mr: 5,
             width: 200,
           }}
-          // onClick={logoutAsync}
-        >
+          onClick={logoutAsync}>
           Logout
         </Button>
       </Grid>
@@ -60,28 +59,17 @@ export default function Home() {
           * Then choose different prompt templates and customize them by
           clicking the button below.
         </Typography>
+
         <Grid item>
           <Button
             variant="outlined"
             sx={{
               width: "350px",
               height: "60px",
-              mt: 13,
-            }}
-            onClick={() => navigate("/set-keys")}>
-            Set API Keys
-          </Button>
-        </Grid>
-        <Grid item>
-          <Button
-            variant="outlined"
-            sx={{
-              width: "350px",
-              height: "60px",
-              mt: "2%",
+              mt: "8%",
             }}
             onClick={() => navigate(`/prompt-templates`)}>
-            Continue Without API Keys
+            Continue to Prompt Templates
           </Button>
         </Grid>
       </Grid>

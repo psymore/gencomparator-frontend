@@ -1,13 +1,12 @@
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
+import ProtectedRoute from "./lib/ProtectedRoute";
 import Enter from "./scenes/components/Enter";
 import Home from "./scenes/home/Home";
 import MagicLogin from "./scenes/login/MagicLogin";
-import ProtectedRoute from "./lib/ProtectedRoute";
-import Evaluation from "./scenes/results/Evaluation";
-import PromptTemplates from "./scenes/templatePrompts/PromptTemplates";
-import SetApiKeys from "./scenes/apiKeys/SetApiKeys";
+import PromptTemplates from "./scenes/prompt/PromptTemplates";
+import SendPrompt from "./scenes/prompt/SendPrompt";
 
 const theme = createTheme({
   components: {
@@ -53,33 +52,26 @@ function App() {
             }
             path="/"
           />
-          <Route
-            element={
-              <ProtectedRoute isLoggedIn={token}>
-                <SetApiKeys />
-              </ProtectedRoute>
-            }
-            path="/set-keys"
-          />
 
           <Route
             path="/prompt-templates"
             element={
-              // <ProtectedRoute isLoggedIn={token}>
-              <PromptTemplates />
-              // </ProtectedRoute>
+              <ProtectedRoute isLoggedIn={token}>
+                <PromptTemplates />
+              </ProtectedRoute>
             }
           />
 
-          <Route
+          <Route path="/send-prompt" element={<SendPrompt />} />
+
+          {/* <Route
             path="/evaluation"
             element={
               <ProtectedRoute isLoggedIn={token}>
                 <Evaluation />
               </ProtectedRoute>
             }
-          />
-          {/* <Route path="/send-template" element={<SendTemplate />} /> */}
+          /> */}
         </Routes>
       </ThemeProvider>
     </div>
