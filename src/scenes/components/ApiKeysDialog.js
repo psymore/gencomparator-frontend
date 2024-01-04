@@ -1,6 +1,6 @@
 import { Button, Dialog, Grid, TextField, Typography } from "@mui/material";
 import { useState } from "react";
-import { saveKey } from "../../services/userService.js";
+import { saveKey } from "../../services/apiKeyService.js";
 import CustomDialog from "./CustomDialog.js";
 
 export default function ApiKeysDialog({ open, onClose }) {
@@ -80,11 +80,9 @@ export default function ApiKeysDialog({ open, onClose }) {
           <Typography>Gencomparator Settings</Typography>
           <Typography
             sx={{ mt: 1, fontSize: 12, color: "red", textAlign: "justify" }}>
-            Note: You API keys are not stored in a cookie, localStorage, or
-            server. Because of this, you must set your API keys every time you
-            load Gencomparator. If you prefer not to worry about it, installing
-            Gencomparator locally and setting your API keys as environment
-            variables is recommended.
+            Note: You API keys are stored with a robust encryption. If you
+            prefer not to worry about it, installing Gencomparator locally and
+            setting your API keys as environment variables is recommended.
           </Typography>
 
           {apiKeysArray.map(({ label, key }) => (

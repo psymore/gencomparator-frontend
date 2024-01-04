@@ -15,6 +15,7 @@ export default function Home() {
             color: "white",
             mr: 5,
             width: 200,
+            mb: 2,
           }}
           onClick={logoutAsync}>
           Logout
@@ -28,37 +29,43 @@ export default function Home() {
         sx={{
           height: "80vh",
           width: "60vw",
-          backgroundColor: "#282c34",
+          backgroundColor: "#3a4754",
           borderRadius: "4rem",
         }}>
         <Typography sx={{ fontSize: "2rem", mt: 5, color: "white" }}>
           This is gencomparator.
         </Typography>
-        <Typography
-          sx={{
-            fontSize: "1.6rem",
-            ml: "2%",
-            mt: 12,
-            mr: 2,
-            color: "white",
-            alignItems: "left",
-            display: "flex",
-          }}>
-          * First set your API keys for different LLMs that you want to get
-          response and their evaluation.
-        </Typography>
-        <Typography
-          sx={{
-            fontSize: "1.6rem",
-            ml: "2%",
-            mt: 5,
-            mr: 2,
-            color: "white",
-            display: "flex",
-          }}>
-          * Then choose different prompt templates and customize them by
-          clicking the button below.
-        </Typography>
+        <Grid item xs={12} sx={{ ml: "6%", mt: 7, mr: 2, alignItems: "left" }}>
+          <Typography
+            sx={{
+              fontSize: "1.6rem",
+              color: "white",
+              textAlign: "justify",
+              display: "flex",
+            }}>
+            * First, set your API keys for different LLMs.
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: "1.6rem",
+              mt: 5,
+              color: "white",
+              textAlign: "justify",
+              display: "flex",
+            }}>
+            * Then, choose different prompt templates and customize them.
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: "1.6rem",
+              mt: 5,
+              textAlign: "justify",
+              color: "white",
+              display: "flex",
+            }}>
+            * Last step is to get responses and LLM evaluation.
+          </Typography>
+        </Grid>
 
         <Grid item>
           <Button

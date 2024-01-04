@@ -26,9 +26,11 @@ export default function MagicLogin() {
       console.log(res);
       setDialogContent({
         // text: "Please click the link in your email to proceed with the login process.",
+        title: res?.data?.ok
+          ? "Login Link Sent Successfully"
+          : "An error ocurred",
         text: res?.data?.message,
-        title: "Login Link Sent Successfully",
-        success: true,
+        success: res?.data?.ok,
       });
 
       setOpenDialog(true);
@@ -36,7 +38,7 @@ export default function MagicLogin() {
       setDialogContent({
         title: "An error ocurred.",
         text: "Unable to login.",
-        success: false,
+        success: res?.data?.ok,
       });
       setOpenDialog(true);
     }
@@ -48,6 +50,13 @@ export default function MagicLogin() {
 
   const emailSubmit = e => {
     e.preventDefault();
+    if (!userEmail.trim()) {
+      setDialogContent({
+        title: "Empty Email",
+        text: "Please enter your email address.",
+        success: false,
+      });
+    }
     signIn(userEmail);
     setUserEmail("");
   };

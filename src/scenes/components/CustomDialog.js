@@ -11,19 +11,21 @@ export default function CustomDialog({ open, onClose, title, text, success }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "left",
+            fontWeight: "600",
+            fontSize: 20,
           }}>
           {title}
           {success === true ? (
             <DoneIcon
               sx={{
-                mb: 0.6,
+                mb: 0.5,
                 ml: 0.5,
               }}
             />
           ) : (
             <CancelOutlinedIcon
               sx={{
-                mb: 0.6,
+                mb: 0.5,
                 ml: 0.5,
               }}
             />
@@ -32,15 +34,15 @@ export default function CustomDialog({ open, onClose, title, text, success }) {
         <Typography
           sx={{
             mt: 1,
-            fontSize: 15,
+            fontSize: 17.8,
             textAlign: "justify",
           }}>
-          {text}
+          {text}.
         </Typography>
         <Typography
           sx={{
             mt: 3,
-            fontSize: 11,
+            fontSize: 14,
             textAlign: "justify",
             display: "flex",
             alignItems: "center",
