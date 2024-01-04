@@ -11,25 +11,27 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getKey } from "../../services/apiKeyService.js";
+import { createPrompt } from "../../services/promptService.js";
+import { getPromptTemplateList } from "../../services/promptTemplateService.js";
 import ApiKeysDialog from "../components/ApiKeysDialog";
 import CustomizedAutocomplete from "../components/CustomizedAutocomplete.js";
 import SendPrompt from "./SendPrompt.js";
 
-const URL = "http://localhost:3001";
-
 export default function PromptTemplates() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
-  const [apiDialog, setApiDialog] = useState(true);
-  const [isError, setIsError] = useState(false);
+  const [selectedCardIndex, setSelectedCardIndex] = useState(0);
+  const [apiDialog, setApiDialog] = useState(false);
+  const [isError, setIsError] = useState(true);
   const [muiActive, setMuiActive] = useState(true); //for styling of buttons
   const [title, setTitle] = useState("");
   const [titleExists, setTitleExists] = useState(false);
   const [fields, setFields] = useState([]);
   const [style, setStyle] = useState("");
+  const [foundApiKeys, setFoundApiKeys] = useState(false);
   const [promptTemplates, setPromptTemplates] = useState([]);
 
   const navigate = useNavigate();
@@ -48,49 +50,40 @@ export default function PromptTemplates() {
     const value = e.target.value;
     setTitle(value);
     console.log(value);
-    {
-      value !== "" ? setTitleExists(true) : setTitleExists(false);
-    }
+
+    setTitleExists(value !== "");
+
+    console.log(titleExists);
   };
   const handleFieldChange = (_, value) => {
     setFields(value);
-    setIsError(value.length > 0 ? false : true);
+    setIsError(value.length === 0 ? true : false);
   };
 
-  const handleDialogOpen = index => {
+  const handleDialogOpen = (index, counter) => {
     setSelectedCard(index);
+    setSelectedCardIndex(counter);
+    setIsError(fields.length === 0);
     setDialogOpen(true);
   };
+
   const handleDialogClose = () => {
     setDialogOpen(false);
-    setIsError(false);
   };
 
-  const handleApiDialogOpen = async () => {
-    try {
-      const response = await axios.get("http://localhost:3001/api-key/list");
-      const apiKeys = response.data;
-      console.log(apiKeys);
-      // Check if apiKeys is not empty before opening the dialog
-      if (apiKeys.length > 0) {
-        setApiDialog(true);
-      } else {
-        // Handle the case where apiKeys is empty (optional)
-        console.log("No API keys found.");
-        // You can display a message or take other actions if needed.
-      }
-    } catch (error) {
-      console.error("Error fetching API keys:", error);
-      // Handle the error, display an error message, etc.
-    }
+  const handleApiDialogOpen = () => {
+    setApiDialog(true);
   };
 
   const handleApiDialogClose = () => {
     setApiDialog(false);
   };
 
+  console.log(selectedCardIndex);
+
   const parameters = () => {
     const data = {
+      promptTemplateId: promptTemplates[selectedCardIndex]?.id,
       title: title,
       titleExists: titleExists,
       style: style,
@@ -98,36 +91,53 @@ export default function PromptTemplates() {
     };
     return data;
   };
-  // console.log(parameters());
-  console.log(parameters());
 
   const handleCreatePrompt = async e => {
     e.preventDefault();
 
     const requestParameters = parameters();
-    try {
-      const response = await axios.post(`${URL}/prompt`, requestParameters);
-      console.log(response);
-      <SendPrompt text={response} />;
-      navigate("/send-prompt");
-    } catch (error) {
-      console.error("Error creating prompt:", error);
+    if (!isError) {
+      try {
+        const response = createPrompt(requestParameters);
+        <SendPrompt text={response} />;
+        navigate("/send-prompt");
+      } catch (error) {
+        console.error("Error creating prompt:", error);
+      }
     }
   };
 
   useEffect(() => {
     const getPromptTemplates = async () => {
       try {
-        const response = await axios.get(`${URL}/prompt-template/list`);
-        setPromptTemplates(response.data.promptTemplates);
-        console.log(response);
+        const response = await getPromptTemplateList();
+        setPromptTemplates(response?.data?.promptTemplates);
+
+        // console.log(response);
       } catch (error) {
         console.error("Error fetching prompt templates:", error);
       }
     };
-    handleApiDialogOpen();
+
+    const getApiKeys = async () => {
+      try {
+        const response = await getKey();
+        const apiKeys = response.data;
+
+        setFoundApiKeys(apiKeys.length > 0 ? false : true);
+        setApiDialog(foundApiKeys);
+      } catch (error) {
+        console.error("Error fetching API keys:", error);
+      }
+    };
+
+    setIsError(true);
+
     getPromptTemplates();
+    getApiKeys();
   }, []);
+
+  console.log(parameters());
 
   const PromptCards = ({ title, explanation, openSelection }) => {
     return (
@@ -220,13 +230,12 @@ export default function PromptTemplates() {
                 title={"You can select multiple input fields"}
                 placeholder={"Select input fields"}
               />
-              {isError ? (
-                <Alert sx={{ mt: 1 }} severity="error">
-                  Select at least one field
-                </Alert>
-              ) : (
-                <></>
-              )}
+
+              <Alert sx={{ mt: 1 }} severity={isError ? "warning" : "success"}>
+                {isError
+                  ? "Select at least one input field"
+                  : "Ready to generate code"}
+              </Alert>
             </Grid>
             <Grid
               container
@@ -318,10 +327,13 @@ export default function PromptTemplates() {
                 title={template.name}
                 explanation={template.description}
                 openSelection={() =>
-                  handleDialogOpen({
-                    title: template.name,
-                    explanation: template.description,
-                  })
+                  handleDialogOpen(
+                    {
+                      title: template.name,
+                      explanation: template.description,
+                    },
+                    ix
+                  )
                 }
               />
             ))}

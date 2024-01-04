@@ -1,24 +1,26 @@
-import { Grid, TextareaAutosize } from "@mui/material";
-import axios from "axios";
+import { Grid, TextareaAutosize, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
-
-const URL = "http://localhost:3001";
+import { getPrompt } from "../../services/promptService";
+// import DOMPurify from 'dompurify';
 
 const SendPrompt = () => {
   const [prompt, setPrompt] = useState("");
 
   useEffect(() => {
-    const getPrompt = async () => {
+    const callPrompt = async () => {
       try {
-        const response = await axios.get(`${URL}/prompt/list`);
+        const response = await getPrompt();
         setPrompt(response.data);
         console.log(response);
       } catch (error) {
         console.error("Error showing prompt:", error);
       }
     };
-    getPrompt();
+    callPrompt();
   }, []);
+
+  // const sanitizedHTML = DOMPurify.sanitize(prompt);
+
   return (
     <Grid container>
       <Grid
@@ -42,9 +44,11 @@ const SendPrompt = () => {
             minWidth: "70vw",
           }}
           type="text"
-          // value={inputText}
-          // onChange={handleInputChange}
         />
+        {/* <Typography
+          sx={{ color: "white" }}
+          dangerouslySetInnerHTML={{ __html: sanitizedHTML }}
+        /> */}
       </Grid>
     </Grid>
   );
