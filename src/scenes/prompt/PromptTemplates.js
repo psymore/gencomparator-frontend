@@ -14,11 +14,10 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getKey } from "../../services/apiKeyService.js";
-import { createPrompt } from "../../services/promptService.js";
+import { createAndSendPrompt } from "../../services/promptService.js";
 import { getPromptTemplateList } from "../../services/promptTemplateService.js";
 import ApiKeysDialog from "../components/ApiKeysDialog";
 import CustomizedAutocomplete from "../components/CustomizedAutocomplete.js";
-import SendPrompt from "./SendPrompt.js";
 
 export default function PromptTemplates() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -79,8 +78,6 @@ export default function PromptTemplates() {
     setApiDialog(false);
   };
 
-  console.log(selectedCardIndex);
-
   const parameters = () => {
     const data = {
       promptTemplateId: promptTemplates[selectedCardIndex]?.id,
@@ -92,19 +89,46 @@ export default function PromptTemplates() {
     return data;
   };
 
+  // const handleCreatePrompt = async e => {
+  //   e.preventDefault();
+
+  //   const requestParameters = parameters();
+  //   if (!isError) {
+  //     try {
+  //       const response = createPrompt(requestParameters);
+  //       <SendPrompt text={response} />;
+  //       navigate("/send-prompt");
+  //     } catch (error) {
+  //       console.error("Error creating prompt:", error);
+  //     }
+  //   }
+  // };
   const handleCreatePrompt = async e => {
     e.preventDefault();
 
     const requestParameters = parameters();
-    if (!isError) {
-      try {
-        const response = createPrompt(requestParameters);
-        <SendPrompt text={response} />;
-        navigate("/send-prompt");
-      } catch (error) {
-        console.error("Error creating prompt:", error);
+
+    try {
+      if (!isError) {
+        const response = await createAndSendPrompt(requestParameters);
+        console.log(response);
       }
+
+      navigate("/send-prompt");
+    } catch (error) {
+      console.error("Error creating/sending prompt:", error);
     }
+  };
+
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const [dialogContent, setDialogContent] = useState({
+    title: "",
+    text: "",
+    success: false,
+  });
+  const handleClose = () => {
+    setOpenDialog(false);
   };
 
   useEffect(() => {
@@ -112,7 +136,6 @@ export default function PromptTemplates() {
       try {
         const response = await getPromptTemplateList();
         setPromptTemplates(response?.data?.promptTemplates);
-
         // console.log(response);
       } catch (error) {
         console.error("Error fetching prompt templates:", error);
@@ -286,10 +309,26 @@ export default function PromptTemplates() {
               onClick={handleCreatePrompt}>
               Generate Code
             </Button>
+            {openDialog ? (
+              <CustomDialog
+                open={openDialog}
+                onClose={handleClose}
+                title={dialogContent.title}
+                text={dialogContent.text}
+                success={dialogContent.success}
+              />
+            ) : (
+              <></>
+            )}
           </Grid>
         </Dialog>
       )}
-
+      {/* <Button
+        sx={{ width: "150px", fontSize: 14, mb: 3 }}
+        // onClick={handleCreatePrompt}>
+        onClick={handleCreatePromptTest}>
+        Generate Code
+      </Button> */}
       <Grid item xs={1}></Grid>
       <Grid item xs={10} mt={5}>
         <Grid item xs={12}>
