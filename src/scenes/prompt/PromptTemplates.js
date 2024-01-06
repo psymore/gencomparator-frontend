@@ -12,15 +12,15 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { getKey } from "../../services/apiKeyService.js";
 import { createAndSendPrompt } from "../../services/promptService.js";
 import { getPromptTemplateList } from "../../services/promptTemplateService.js";
 import ApiKeysDialog from "../components/ApiKeysDialog";
+import CustomDialog from "../components/CustomDialog.js";
 import CustomizedAutocomplete from "../components/CustomizedAutocomplete.js";
 
 export default function PromptTemplates() {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [parameterDialogOpen, setParameterDialogOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [selectedCardIndex, setSelectedCardIndex] = useState(0);
   const [apiDialog, setApiDialog] = useState(false);
@@ -29,11 +29,20 @@ export default function PromptTemplates() {
   const [title, setTitle] = useState("");
   const [titleExists, setTitleExists] = useState(false);
   const [fields, setFields] = useState([]);
-  const [style, setStyle] = useState("");
+  const [style, setStyle] = useState("mui");
   const [foundApiKeys, setFoundApiKeys] = useState(false);
   const [promptTemplates, setPromptTemplates] = useState([]);
+  const [openDialogSuccess, setOpenDialogSuccess] = useState(false);
 
-  const navigate = useNavigate();
+  const [successDialogContent, setSuccessDialogContent] = useState({
+    title: "",
+    text: "",
+    success: false,
+  });
+
+  const handleCloseSuccess = () => {
+    openDialogSuccess(false);
+  };
 
   const handleMuiClick = () => {
     setMuiActive(true);
@@ -48,26 +57,22 @@ export default function PromptTemplates() {
   const handleTitle = e => {
     const value = e.target.value;
     setTitle(value);
-    console.log(value);
-
     setTitleExists(value !== "");
-
-    console.log(titleExists);
   };
   const handleFieldChange = (_, value) => {
     setFields(value);
     setIsError(value.length === 0 ? true : false);
   };
 
-  const handleDialogOpen = (index, counter) => {
+  const handleParameterDialogOpen = (index, counter) => {
     setSelectedCard(index);
     setSelectedCardIndex(counter);
     setIsError(fields.length === 0);
-    setDialogOpen(true);
+    setParameterDialogOpen(true);
   };
 
-  const handleDialogClose = () => {
-    setDialogOpen(false);
+  const handleParameterDialogClose = () => {
+    setParameterDialogOpen(false);
   };
 
   const handleApiDialogOpen = () => {
@@ -89,24 +94,12 @@ export default function PromptTemplates() {
     return data;
   };
 
-  // const handleCreatePrompt = async e => {
-  //   e.preventDefault();
-
-  //   const requestParameters = parameters();
-  //   if (!isError) {
-  //     try {
-  //       const response = createPrompt(requestParameters);
-  //       <SendPrompt text={response} />;
-  //       navigate("/send-prompt");
-  //     } catch (error) {
-  //       console.error("Error creating prompt:", error);
-  //     }
-  //   }
-  // };
   const handleCreatePrompt = async e => {
     e.preventDefault();
 
     const requestParameters = parameters();
+
+    let response;
 
     try {
       if (!isError) {
@@ -114,21 +107,15 @@ export default function PromptTemplates() {
         console.log(response);
       }
 
-      navigate("/send-prompt");
+      setSuccessDialogContent({
+        title: "Success Sending Prompt",
+        text: "Prompt Sent to LLMs",
+        success: true,
+      });
+      setOpenDialogSuccess(true);
     } catch (error) {
       console.error("Error creating/sending prompt:", error);
     }
-  };
-
-  const [openDialog, setOpenDialog] = useState(false);
-
-  const [dialogContent, setDialogContent] = useState({
-    title: "",
-    text: "",
-    success: false,
-  });
-  const handleClose = () => {
-    setOpenDialog(false);
   };
 
   useEffect(() => {
@@ -136,7 +123,6 @@ export default function PromptTemplates() {
       try {
         const response = await getPromptTemplateList();
         setPromptTemplates(response?.data?.promptTemplates);
-        // console.log(response);
       } catch (error) {
         console.error("Error fetching prompt templates:", error);
       }
@@ -207,10 +193,10 @@ export default function PromptTemplates() {
           onClose={handleApiDialogClose}
         />
       )}
-      {selectedCard !== null && dialogOpen && (
+      {selectedCard !== null && parameterDialogOpen && (
         <Dialog
-          open={dialogOpen}
-          onClose={handleDialogClose}
+          open={parameterDialogOpen}
+          onClose={handleParameterDialogClose}
           sx={{
             ml: "25%",
             width: "50vw",
@@ -309,13 +295,15 @@ export default function PromptTemplates() {
               onClick={handleCreatePrompt}>
               Generate Code
             </Button>
-            {openDialog ? (
+            {openDialogSuccess ? (
               <CustomDialog
-                open={openDialog}
-                onClose={handleClose}
-                title={dialogContent.title}
-                text={dialogContent.text}
-                success={dialogContent.success}
+                open={openDialogSuccess}
+                onClose={handleCloseSuccess}
+                title={successDialogContent.title}
+                text={successDialogContent.text}
+                success={successDialogContent.success}
+                nav={"/collection"}
+                pageName={"Design Collection"}
               />
             ) : (
               <></>
@@ -366,7 +354,7 @@ export default function PromptTemplates() {
                 title={template.name}
                 explanation={template.description}
                 openSelection={() =>
-                  handleDialogOpen(
+                  handleParameterDialogOpen(
                     {
                       title: template.name,
                       explanation: template.description,

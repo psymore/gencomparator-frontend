@@ -32,9 +32,8 @@ export default function Enter() {
         // alert(res.data.message);
         setWelcomeMessage(res?.data?.message);
         localStorage.setItem("token", res.data.token);
-        setTimeout(() => {
-          navigate("/");
-        }, 2000);
+
+        navigate("/");
       } else {
         setIsError(true);
         setErrorMessage(res?.data?.message);
