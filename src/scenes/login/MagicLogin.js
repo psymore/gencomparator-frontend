@@ -64,64 +64,6 @@ export default function MagicLogin() {
     setOpenDialog(false);
   };
 
-  // const LoginDialog = () => {
-  //   return (
-  //     <CustomDialog
-  //       open={openDialog}
-  //       onClose={handleClose}
-  //       title={dialogContent.title}
-  //       text={dialogContent.text}
-  //       success={success}
-  //     />
-  //     /* <Dialog open={openDialog} onClose={handleClose}>
-  //       <Grid item xs={12} p={3}>
-  //         <Typography
-  //           sx={{
-  //             display: "flex",
-  //             alignItems: "center",
-  //             justifyContent: "left",
-  //           }}>
-  //           {dialogContent.title}
-  //           {dialogContent.success === true ? (
-  //             <DoneIcon
-  //               sx={{
-  //                 mb: 0.6,
-  //                 ml: 0.5,
-  //               }}
-  //             />
-  //           ) : (
-  //             <CancelOutlinedIcon
-  //               sx={{
-  //                 mb: 0.6,
-  //                 ml: 0.5,
-  //               }}
-  //             />
-  //           )}
-  //         </Typography>
-  //         <Typography
-  //           sx={{
-  //             mt: 1,
-  //             fontSize: 15,
-  //             textAlign: "justify",
-  //           }}>
-  //           {dialogContent.text}
-  //         </Typography>
-  //         <Typography
-  //           sx={{
-  //             mt: 3,
-  //             fontSize: 11,
-  //             textAlign: "justify",
-  //             display: "flex",
-  //             alignItems: "center",
-  //             justifyContent: "left",
-  //           }}>
-  //           -- Click outside of this message to close. --
-  //         </Typography>
-  //       </Grid>
-  //     </Dialog> */
-  //   );
-  // };
-
   return (
     <Grid container spacing={0}>
       <Grid item xs={12}>
