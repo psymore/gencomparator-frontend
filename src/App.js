@@ -7,6 +7,7 @@ import Home from "./scenes/home/Home";
 import MagicLogin from "./scenes/login/MagicLogin";
 import PromptTemplates from "./scenes/prompt/PromptTemplates";
 import Collection from "./scenes/prompt/Collection";
+import Cafe from "./Cafe";
 
 const theme = createTheme({
   components: {
@@ -61,6 +62,7 @@ function App() {
           />
 
           <Route path="/collection" element={<Collection />} />
+          {/* <Route path="/cafe" element={<Cafe />} /> */}
 
           {/* <Route
             path="/evaluation"

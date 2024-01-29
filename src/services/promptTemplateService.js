@@ -5,3 +5,11 @@ const getPromptTemplateList = () => {
 };
 
 export { getPromptTemplateList };
+
+// import axios from "axios";
+
+// const getPromptTemplateList = () => {
+//   return axios.get("http://localhost:3001/prompt-template/list");
+// };
+
+// export { getPromptTemplateList };

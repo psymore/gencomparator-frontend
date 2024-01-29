@@ -11,10 +11,10 @@ export default function ApiKeysDialog({ open, onClose }) {
     success: false,
   });
   const [apiKeys, setApiKeys] = useState({
-    PalmApiKey: "",
-    OpenAiApiKey: "",
-    BardApiKey: "",
-    CodyApiKey: "",
+    GeminiKey: "",
+    OpenAiKey: "",
+    AlephAlphaKey: "",
+    // CodyApiKey: "",
   });
 
   const handleClose = () => {
@@ -42,24 +42,24 @@ export default function ApiKeysDialog({ open, onClose }) {
       console.error("Error saving API keys:", error);
       setOpenDialog(true);
       setDialogContent({
-        title: "Error when saving API Keys.",
-        text: "Safely Stored",
+        title: "Error when saving API Keys",
+        text: "Please try again later",
         success: false,
       });
       // Handle error or show an error message
     }
   };
   const apiKeysArray = [
-    { label: "PaLM API Key", key: "PalmApiKey" },
-    { label: "Open AI API Key", key: "OpenAiApiKey" },
-    { label: "Bard API Key", key: "BardApiKey" },
-    { label: "Cody API Key", key: "CodyApiKey" },
+    { label: "Gemini API Key", key: "GeminiKey" },
+    { label: "Open AI API Key", key: "OpenAiKey" },
+    { label: "Aleph Alpha API Key", key: "AlephAlphaKey" },
+    // { label: "Cody API Key", key: "CodyApiKey" },
   ];
 
   const countEnteredKeys = Object.values(apiKeys).filter(
     key => key !== ""
   ).length;
-  const minimumKeysRequired = 2;
+  const minimumKeysRequired = 1;
   const hasAtLeastTwoKeys = countEnteredKeys >= minimumKeysRequired;
 
   return (
@@ -90,7 +90,7 @@ export default function ApiKeysDialog({ open, onClose }) {
               <TextField
                 fullWidth
                 label={label}
-                value={apiKeys[key]}
+                value={apiKeys?.[key] ?? ""}
                 onChange={e => handleApiKeyChange(key, e.target.value)}
               />
             </Grid>

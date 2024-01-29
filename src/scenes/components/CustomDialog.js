@@ -51,24 +51,31 @@ export default function CustomDialog({
           {text}.
         </Typography>
         {!nav ? (
-          <Typography
-            sx={{
-              mt: 3,
-              fontSize: 14,
-              textAlign: "justify",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "left",
-            }}>
-            -- Click outside of this message to close. --
-          </Typography>
+          <>
+            <Typography
+              sx={{
+                mt: 3,
+                fontSize: 14,
+                textAlign: "justify",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "left",
+              }}>
+              -- Click outside of this message to close. --
+            </Typography>
+          </>
         ) : (
           <></>
         )}
         {nav ? (
-          <Button sx={{ height: "30px" }} onClick={() => navigate(nav)}>
-            {" "}
-            Go to {pageName}{" "}
+          <Button
+            sx={{
+              height: "40px",
+              mt: 2,
+              fontSize: 18,
+            }}
+            onClick={() => navigate(nav)}>
+            {pageName}{" "}
           </Button>
         ) : (
           <></>

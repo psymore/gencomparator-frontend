@@ -18,6 +18,9 @@ import { getPromptTemplateList } from "../../services/promptTemplateService.js";
 import ApiKeysDialog from "../components/ApiKeysDialog";
 import CustomDialog from "../components/CustomDialog.js";
 import CustomizedAutocomplete from "../components/CustomizedAutocomplete.js";
+import { useNavigate } from "react-router-dom";
+import { logoutAsync } from "../../services/userService.js";
+import Codesandbox from "../sandboxes/Codesandbox.js";
 
 export default function PromptTemplates() {
   const [parameterDialogOpen, setParameterDialogOpen] = useState(false);
@@ -29,10 +32,12 @@ export default function PromptTemplates() {
   const [title, setTitle] = useState("");
   const [titleExists, setTitleExists] = useState(false);
   const [fields, setFields] = useState([]);
-  const [style, setStyle] = useState("mui");
+  const [style, setStyle] = useState({ mui: true, css: false });
   const [foundApiKeys, setFoundApiKeys] = useState(false);
   const [promptTemplates, setPromptTemplates] = useState([]);
   const [openDialogSuccess, setOpenDialogSuccess] = useState(false);
+
+  const navigate = useNavigate();
 
   const [successDialogContent, setSuccessDialogContent] = useState({
     title: "",
@@ -41,17 +46,17 @@ export default function PromptTemplates() {
   });
 
   const handleCloseSuccess = () => {
-    openDialogSuccess(false);
+    setOpenDialogSuccess(false);
   };
 
   const handleMuiClick = () => {
     setMuiActive(true);
-    setStyle("mui");
+    setStyle({ mui: true, css: false });
   };
 
   const handleCssClick = () => {
     setMuiActive(false);
-    setStyle("css");
+    setStyle({ css: true, mui: false });
   };
 
   const handleTitle = e => {
@@ -99,7 +104,16 @@ export default function PromptTemplates() {
 
     const requestParameters = parameters();
 
-    let response;
+    if (!foundApiKeys) {
+      setSuccessDialogContent({
+        title: "No API key found",
+        text: "Enter API Keys for generating code",
+        success: false,
+      });
+      setOpenDialogSuccess(true);
+
+      return;
+    }
 
     try {
       if (!isError) {
@@ -114,6 +128,12 @@ export default function PromptTemplates() {
       });
       setOpenDialogSuccess(true);
     } catch (error) {
+      setSuccessDialogContent({
+        title: "No API key found",
+        text: "Enter API Keys for generating code",
+        success: false,
+      });
+      setOpenDialogSuccess(true);
       console.error("Error creating/sending prompt:", error);
     }
   };
@@ -132,13 +152,17 @@ export default function PromptTemplates() {
       try {
         const response = await getKey();
         const apiKeys = response.data;
+        console.log(apiKeys.length);
+        console.log(foundApiKeys);
+        setFoundApiKeys(Boolean(apiKeys.length));
 
-        setFoundApiKeys(apiKeys.length > 0 ? false : true);
-        setApiDialog(foundApiKeys);
+        !apiKeys.length && setApiDialog(true);
+        // setApiDialog(apiKeys.length === 0 ? false : true);
       } catch (error) {
         console.error("Error fetching API keys:", error);
       }
     };
+    console.log(foundApiKeys);
 
     setIsError(true);
 
@@ -147,6 +171,8 @@ export default function PromptTemplates() {
   }, []);
 
   console.log(parameters());
+
+  console.log(foundApiKeys);
 
   const PromptCards = ({ title, explanation, openSelection }) => {
     return (
@@ -187,10 +213,48 @@ export default function PromptTemplates() {
 
   return (
     <Grid container spacing={0}>
-      {apiDialog !== false && (
+      <Grid
+        container
+        spacing={0} // You can adjust the spacing if needed
+        sx={{
+          mt: 5,
+
+          display: "flex",
+          justifyContent: "space-between",
+        }}>
+        <Grid item xs={6} sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            sx={{
+              fontSize: 20,
+              fontWeight: "bold",
+              color: "white",
+              marginRight: "auto",
+              width: 200,
+              ml: 5,
+            }}
+            onClick={() => handleApiDialogOpen()}>
+            Insert API Keys
+          </Button>
+        </Grid>
+        <Grid item xs={6} sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            sx={{
+              fontSize: 20,
+              fontWeight: "bold",
+              color: "white",
+              mr: 5,
+              width: 200,
+            }}
+            onClick={() => logoutAsync()}>
+            Logout
+          </Button>
+        </Grid>
+      </Grid>
+
+      {apiDialog === true && (
         <ApiKeysDialog
-          open={handleApiDialogOpen}
-          onClose={handleApiDialogClose}
+          open={() => handleApiDialogOpen()}
+          onClose={() => handleApiDialogClose()}
         />
       )}
       {selectedCard !== null && parameterDialogOpen && (
@@ -296,41 +360,29 @@ export default function PromptTemplates() {
               Generate Code
             </Button>
             {openDialogSuccess ? (
-              <CustomDialog
-                open={openDialogSuccess}
-                onClose={handleCloseSuccess}
-                title={successDialogContent.title}
-                text={successDialogContent.text}
-                success={successDialogContent.success}
-                nav={"/collection"}
-                pageName={"Design Collection"}
-              />
+              <>
+                <CustomDialog
+                  open={openDialogSuccess}
+                  onClose={handleCloseSuccess}
+                  title={successDialogContent.title}
+                  text={successDialogContent.text}
+                  success={successDialogContent.success}
+                  nav={!foundApiKeys ? "/collection" : ""}
+                  pageName={!foundApiKeys ? "Go to Design Collection" : ""}
+                  foundApiKeys={foundApiKeys}
+                />
+              </>
             ) : (
               <></>
             )}
           </Grid>
         </Dialog>
       )}
-      {/* <Button
-        sx={{ width: "150px", fontSize: 14, mb: 3 }}
-        // onClick={handleCreatePrompt}>
-        onClick={handleCreatePromptTest}>
-        Generate Code
-      </Button> */}
+
       <Grid item xs={1}></Grid>
       <Grid item xs={10} mt={5}>
         <Grid item xs={12}>
           <Grid container spacing={0}>
-            <Grid
-              item
-              xs={12}
-              sx={{ display: "flex", flexDirection: "row-reverse" }}>
-              <Button
-                sx={{ fontSize: 20, fontWeight: "bold", color: "white" }}
-                onClick={handleApiDialogOpen}>
-                Insert API Keys
-              </Button>
-            </Grid>
             <Grid item xs={12}>
               <Typography
                 sx={{ fontSize: 30, fontWeight: "bold", color: "white" }}>
@@ -364,6 +416,21 @@ export default function PromptTemplates() {
                 }
               />
             ))}
+          </Grid>
+
+          <Grid
+            item
+            xs={12}
+            sx={{
+              display: "flex",
+              mt: 10,
+              display: "flex",
+              justifyContent: "center",
+            }}>
+            <Button onClick={() => navigate("/collection")}>
+              {" "}
+              Go to Collection
+            </Button>
           </Grid>
         </Grid>
       </Grid>

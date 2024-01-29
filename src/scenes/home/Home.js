@@ -17,7 +17,7 @@ export default function Home() {
             width: 200,
             mb: 2,
           }}
-          onClick={logoutAsync}>
+          onClick={() => logoutAsync()}>
           Logout
         </Button>
       </Grid>
